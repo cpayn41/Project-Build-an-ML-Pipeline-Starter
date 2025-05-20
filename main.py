@@ -67,10 +67,14 @@ def go(config: DictConfig):
     	)	
 
         if "data_check" in active_steps:
-            ##################
-            # Implement here #
-            ##################
-            pass
+            _ = mlflow.run(
+        	os.path.join("src", "data_check"),
+        	"main",
+        	env_manager="conda",
+        	parameters={
+        	    "input": "clean_sample.csv:reference"
+        	},
+    	    )
 
         if "data_split" in active_steps:
             ##################
