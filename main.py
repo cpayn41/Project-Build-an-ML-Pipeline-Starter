@@ -21,7 +21,7 @@ _steps = [
 
 
 # This automatically reads in the configuration
-@hydra.main(config_name='config',version_base=None)
+@hydra.main(config_path="/Users/christinapayne/Project-Build-an-ML-Pipeline-Starter", config_name="config", version_base=None)
 def go(config: DictConfig):
     #Ensure Hydra doesn't change the working directory
     os.environ["HYDRA_RUN_DIR"]="."
