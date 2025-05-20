@@ -23,8 +23,8 @@ _steps = [
 # This automatically reads in the configuration
 @hydra.main(config_name='config',version_base=None)
 def go(config: DictConfig):
-	#Ensure Hydra doesn't change the working directory
-	os.environ["HYDRA_RUN_DIR"]="."
+    #Ensure Hydra doesn't change the working directory
+    os.environ["HYDRA_RUN_DIR"]="."
     # Setup the wandb experiment. All runs will be grouped under this name
     os.environ["WANDB_PROJECT"] = config["main"]["project_name"]
     os.environ["WANDB_RUN_GROUP"] = config["main"]["experiment_name"]
