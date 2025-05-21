@@ -8,16 +8,6 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
 logger = logging.getLogger()
 
 def go(args):
-    """
-    Clean the input data and produce a cleaned artifact.
-    Args:
-        input_artifact (str): Name and version of the input artifact to clean (e.g., sample.csv:latest)
-        output_artifact (str): Name of the output cleaned artifact (e.g., clean_sample.csv)
-        output_type (str): Type of the output artifact (e.g., clean_sample)
-        output_description (str): Description of the output artifact
-        min_price (float): Minimum price threshold for filtering data
-        max_price (float): Maximum price threshold for filtering data
-    """
     input_artifact = args.input_artifact
     output_artifact = args.output_artifact
     output_type = args.output_type
@@ -25,11 +15,9 @@ def go(args):
     min_price = args.min_price
     max_price = args.max_price
 
-    # Initialize W&B run
     logger.info("Initializing W&B run")
     run = wandb.init(project="nyc_airbnb", group="basic_cleaning")
 
-    # Download input artifact
     logger.info("Downloading input artifact: %s", input_artifact)
     try:
         artifact = run.use_artifact(input_artifact)
@@ -39,7 +27,6 @@ def go(args):
         logger.error("Failed to download input artifact: %s", str(e))
         raise
 
-    # Read the input data
     logger.info("Reading input data")
     try:
         df = pd.read_csv(artifact_path)
@@ -48,7 +35,6 @@ def go(args):
         logger.error("Failed to read input data: %s", str(e))
         raise
 
-    # Data cleaning
     logger.info("Cleaning data")
     try:
         df = df[df['price'].between(min_price, max_price)]
@@ -58,7 +44,6 @@ def go(args):
         logger.error("Failed to clean data: %s", str(e))
         raise
 
-    # Save the cleaned data
     logger.info("Saving cleaned data")
     try:
         os.makedirs(output_type, exist_ok=True)
@@ -69,7 +54,6 @@ def go(args):
         logger.error("Failed to save cleaned data: %s", str(e))
         raise
 
-    # Log the output artifact to W&B
     logger.info("Logging artifact to W&B")
     try:
         artifact = wandb.Artifact(
@@ -80,8 +64,11 @@ def go(args):
         artifact.add_file(output_path)
         run.log_artifact(artifact)
         logger.info("Artifact logged successfully: %s", output_artifact)
+        # Wait for the artifact to be uploaded
+        artifact.wait()
+        logger.info("Artifact upload completed: %s", output_artifact)
     except Exception as e:
-        logger.error("Failed to log artifact: %s", str(e))
+        logger.error("Failed to log or upload artifact: %s", str(e))
         raise
 
     logger.info("Finishing W&B run")
@@ -89,35 +76,11 @@ def go(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Data cleaning step")
-    parser.add_argument(
-        "--input_artifact",
-        type=str,
-        help="Name and version of the input artifact to clean (e.g., sample.csv:latest)"
-    )
-    parser.add_argument(
-        "--output_artifact",
-        type=str,
-        help="Name of the output cleaned artifact (e.g., clean_sample.csv)"
-    )
-    parser.add_argument(
-        "--output_type",
-        type=str,
-        help="Type of the output artifact (e.g., clean_sample)"
-    )
-    parser.add_argument(
-        "--output_description",
-        type=str,
-        help="Description of the output artifact"
-    )
-    parser.add_argument(
-        "--min_price",
-        type=float,
-        help="Minimum price threshold for filtering data"
-    )
-    parser.add_argument(
-        "--max_price",
-        type=float,
-        help="Maximum price threshold for filtering data"
-    )
+    parser.add_argument("--input_artifact", type=str, help="Name and version of the input artifact to clean (e.g., sample.csv:latest)")
+    parser.add_argument("--output_artifact", type=str, help="Name of the output cleaned artifact (e.g., clean_sample.csv)")
+    parser.add_argument("--output_type", type=str, help="Type of the output artifact (e.g., clean_sample)")
+    parser.add_argument("--output_description", type=str, help="Description of the output artifact")
+    parser.add_argument("--min_price", type=float, help="Minimum price threshold for filtering data")
+    parser.add_argument("--max_price", type=float, help="Maximum price threshold for filtering data")
     args = parser.parse_args()
     go(args)
