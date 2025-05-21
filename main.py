@@ -72,7 +72,7 @@ def go(config: DictConfig):
         	"main",
         	env_manager="conda",
         	parameters={
-        	    "input": "clean_sample.csv:reference"
+        	    "input": "clean_sample:reference"
         	},
     	    )
 
