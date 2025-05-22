@@ -4,6 +4,14 @@ conda_env: ../../conda.yml
 entry_points:
   main:
     parameters:
-      input:
+      csv:
         type: str
-    command: "python test_data.py --input {input}"
+      ref:
+        type: str
+      kl_threshold:
+        type: float
+      min_price:
+        type: float
+      max_price:
+        type: float
+    command: "python run.py --csv {csv} --ref {ref} --kl_threshold {kl_threshold} --min_price {min_price} --max_price {max_price}"
