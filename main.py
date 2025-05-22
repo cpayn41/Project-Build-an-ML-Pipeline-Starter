@@ -97,13 +97,13 @@ def go(config: DictConfig):
                 "main",
                 env_manager="conda",
                 parameters={
-                    "trainval_artifact": "trainval_data.csv:latest",
+                    "trainval_artifact": "trainval_data:latest",
                     "val_size": config["modeling"]["val_size"],
                     "random_seed": config["modeling"]["random_seed"],
                     "stratify_by": config["modeling"]["stratify_by"],
                     "rf_config": rf_config,
-                    "run_name": config["modeling"]["run_name"],
-                    "output_artifact": "random_forest_export"
+                    "max_tfidf_features": config["modeling"]["max_tfidf_features"],
+                    "output_artifact": config["modeling"]["output_artifact"],
                 },
             )
 
