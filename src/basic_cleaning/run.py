@@ -44,6 +44,9 @@ def go(args):
         logger.error("Failed to clean data: %s", str(e))
         raise
 
+    idx = df['longitude'].between(-74.25, -73.50) & df['latitude'].between(40.5, 41.2)
+    df = df[idx].copy()
+
     logger.info("Saving cleaned data")
     try:
         os.makedirs(output_type, exist_ok=True)
