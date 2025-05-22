@@ -1,0 +1,16 @@
+name: test_regression_model
+conda_env: conda.yml
+
+entry_points:
+  main:
+    parameters:
+      model_export:
+        description: Artifact containing the trained model
+        type: string
+      test_artifact:
+        description: Artifact containing the test dataset
+        type: string
+      output_artifact:
+        description: Name for the output test results
+        type: string
+    command: "python run.py --model_export {model_export} --test_artifact {test_artifact} --output_artifact {output_artifact}"
