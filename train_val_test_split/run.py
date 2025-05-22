@@ -8,16 +8,14 @@ import pandas as pd
 import wandb
 import tempfile
 from sklearn.model_selection import train_test_split
-from wandb_utils.log_artifact import log_artifact
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)-15s %(message)s")
 logger = logging.getLogger()
 
 def go(args):
-    run = wandb.init(job_type="train_val_test_split")
+    run = wandb.init(project="nyc_airbnb", job_type="train_val_test_split")
     run.config.update(args)
 
-    # Download input artifact
     logger.info(f"Fetching artifact {args.input_artifact}")
     artifact_local_path = run.use_artifact(args.input_artifact).file()
 
@@ -31,18 +29,20 @@ def go(args):
         stratify=df[args.stratify_by] if args.stratify_by != 'none' else None,
     )
 
-    # Save to output files
+    # Save to output files and log as W&B artifacts
     for df, k in zip([trainval, test], ['trainval', 'test']):
         logger.info(f"Uploading {k}_data.csv dataset")
-        with tempfile.NamedTemporaryFile("w") as fp:
+        with tempfile.NamedTemporaryFile(prefix=f"{k}_data_", suffix=".csv", delete=False) as fp:
             df.to_csv(fp.name, index=False)
-            log_artifact(
-                f"{k}_data.csv",
-                f"{k}_data",
-                f"{k} split of dataset",
-                fp.name,
-                run,
+            artifact = wandb.Artifact(
+                name=f"{k}_data",
+                type="dataset",
+                description=f"{k} split of dataset"
             )
+            artifact.add_file(fp.name)
+            run.log_artifact(artifact)
+
+    run.finish()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Split test and remainder")
