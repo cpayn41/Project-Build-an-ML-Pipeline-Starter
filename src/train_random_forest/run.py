@@ -218,26 +218,32 @@ def get_inference_pipeline(rf_config, max_tfidf_features):
     processed_features = ordinal_categorical + non_ordinal_categorical + zero_imputed + ["last_review", "name"]
 
     # Create random forest
-    random_forest = RandomForestRegressor(**rf_config)
-
+    logger.info(f"rf_config: {rf_config}")
+    try:    
+        random_forest = RandomForestRegressor(**rf_config)
+        logger.info("RandomForestRegressor initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize RandomForestRegressor: {str(e)}")
+        raise
     ######################################
     # Create the inference pipeline. The pipeline must have 2 steps: 
     # 1 - a step called "preprocessor" applying the ColumnTransformer instance that we saved in the `preprocessor` variable
     # 2 - a step called "random_forest" with the random forest instance that we just saved in the `random_forest` variable.
     # HINT: Use the explicit Pipeline constructor so you can assign the names to the steps, do not use make_pipeline
+    try:
+        sk_pipe = Pipeline(
+            steps =[
+                ("preprocessor", preprocessor),
+                ("random_forest", RandomForestRegressor(**rf_config))
+            ]
+        )
 
-    sk_pipe = Pipeline(
-        steps =[
-            ("preprocessor", preprocessor),
-            ("random_forest", RandomForestRegressor(**rf_config))
-        ]
-    )
+        logger.info(f"Pipeline steps: {sk_pipe.steps}")
+    except Exception as e:
+        logger.error(f"Failed to construct Pipeline: {str(e)}")
+        raise
 
-
-logger.info(f"Pipeline steps: {sk_pipe.steps}")
-
-
-return sk_pipe, processed_features
+    return sk_pipe, processed_features
     ######################################
 
 
